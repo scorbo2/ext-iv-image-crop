@@ -1,11 +1,14 @@
 package ca.corbett.imageviewer.extensions.imagecrop;
 
 import ca.corbett.extras.MessageUtil;
+import ca.corbett.extras.gradient.ColorSelectionType;
 import ca.corbett.extras.image.ImagePanel;
 import ca.corbett.extras.image.ImagePanelConfig;
 import ca.corbett.extras.image.ImageUtil;
 import ca.corbett.extras.io.KeyStrokeManager;
 import ca.corbett.forms.FormPanel;
+import ca.corbett.forms.fields.ColorField;
+import ca.corbett.forms.fields.ComboField;
 import ca.corbett.forms.fields.LabelField;
 import ca.corbett.forms.fields.NumberField;
 import ca.corbett.forms.fields.PanelField;
@@ -33,6 +36,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,6 +62,8 @@ public class ImageCropDialog extends JDialog {
     //    wtf, UTIL-141 was fixed years ago... TODO let's fix this already, sheesh
     private final int CROP_INCREMENT = 10;
 
+    private ColorField cropColorField;
+    private ComboField<String> cropLineWidthField;
     private NumberField cropLeftField;
     private NumberField cropTopField;
     private NumberField cropRightField;
@@ -171,12 +177,26 @@ public class ImageCropDialog extends JDialog {
      * Invoked internally to update the visible crop preview in the displayed image.
      */
     private void updateVisibleCrop() {
-        float lineWidth = imgWidth / 250f;
+        // Figure out line thickness based on image size and user selection:
+        float denominator = switch (cropLineWidthField.getSelectedIndex()) {
+            case 0 -> 250f; // thin
+            case 1 -> 125f; // medium
+            case 2 -> 75f; // thick
+            default -> 250f;
+        };
+        float lineWidth = imgWidth / denominator;
+        lineWidth = Math.max(lineWidth, 1f); // enforce a minimum line width of 1 pixel, for very small images
+
+        // Scale dash pattern relative to line width
+        float dashLength = lineWidth * 3f;
+        float gapLength = lineWidth * 2.5f;
+
         Graphics2D graphics = dBuffer.createGraphics();
         graphics.drawImage(originalImage, 0, 0, null);
-        graphics.setColor(Color.RED); // TODO make configurable
+        graphics.setColor(cropColorField.getColor());
         graphics.setStroke(
-            new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, new float[]{10f, 10f}, 0f));
+            new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+                            1f, new float[]{dashLength, gapLength}, 0f));
         int newLeft = cropLeftField.getCurrentValue().intValue();
         int newRight = imgWidth - cropRightField.getCurrentValue().intValue();
         int newBottom = imgHeight - cropBottomField.getCurrentValue().intValue();
@@ -196,11 +216,12 @@ public class ImageCropDialog extends JDialog {
     }
 
     private FormPanel buildControlPanel() {
+        final int MAX = Integer.MAX_VALUE; // image dimensions aren't available at form build time, so...
         FormPanel formPanel = new FormPanel();
         formPanel.setBorderMargin(8);
         formPanel.setBorder(BorderFactory.createLoweredBevelBorder());
 
-        cropLeftField = new NumberField("Left crop: ", 0, 0, 2000, CROP_INCREMENT);
+        cropLeftField = new NumberField("Left crop: ", 0, 0, MAX, CROP_INCREMENT);
         cropLeftField.addValueChangedListener(f -> updateVisibleCrop());
         cropLeftField.getMargins().setLeft(20);
         formPanel.add(cropLeftField);
@@ -209,7 +230,7 @@ public class ImageCropDialog extends JDialog {
         label.getMargins().setLeft(15).setBottom(10);
         formPanel.add(label);
 
-        cropTopField = new NumberField("Top crop: ", 0, 0, 2000, CROP_INCREMENT);
+        cropTopField = new NumberField("Top crop: ", 0, 0, MAX, CROP_INCREMENT);
         cropTopField.addValueChangedListener(f -> updateVisibleCrop());
         formPanel.add(cropTopField);
 
@@ -217,7 +238,7 @@ public class ImageCropDialog extends JDialog {
         label.getMargins().setLeft(15).setBottom(10);
         formPanel.add(label);
 
-        cropRightField = new NumberField("Right crop: ", 0, 0, 2000, CROP_INCREMENT);
+        cropRightField = new NumberField("Right crop: ", 0, 0, MAX, CROP_INCREMENT);
         cropRightField.addValueChangedListener(f -> updateVisibleCrop());
         formPanel.add(cropRightField);
 
@@ -225,7 +246,7 @@ public class ImageCropDialog extends JDialog {
         label.getMargins().setLeft(15).setBottom(10);
         formPanel.add(label);
 
-        cropBottomField = new NumberField("Bottom crop: ", 0, 0, 2000, CROP_INCREMENT);
+        cropBottomField = new NumberField("Bottom crop: ", 0, 0, MAX, CROP_INCREMENT);
         cropBottomField.addValueChangedListener(f -> updateVisibleCrop());
         formPanel.add(cropBottomField);
 
@@ -245,11 +266,20 @@ public class ImageCropDialog extends JDialog {
         label.getMargins().setLeft(15);
         formPanel.add(label);
 
-        origAspectRatioLabel = new LabelField("Aspect ratio (orig.):", "N/A");
+        cropColorField = new ColorField("Crop line color:", ColorSelectionType.SOLID).setColor(Color.RED);
+        cropColorField.addValueChangedListener(f -> updateVisibleCrop());
+        formPanel.add(cropColorField);
+
+        List<String> options = List.of("Thin", "Medium", "Thick");
+        cropLineWidthField = new ComboField<>("Crop line width:", options, 0);
+        cropLineWidthField.addValueChangedListener(f -> updateVisibleCrop());
+        formPanel.add(cropLineWidthField);
+
+        origAspectRatioLabel = new LabelField("Aspect (orig.):", "N/A");
         label.getMargins().setLeft(15);
         formPanel.add(origAspectRatioLabel);
 
-        newAspectRatioLabel = new LabelField("Aspect ratio (crop):", "N/A");
+        newAspectRatioLabel = new LabelField("Aspect (crop):", "N/A");
         label.getMargins().setLeft(15);
         formPanel.add(newAspectRatioLabel);
 
