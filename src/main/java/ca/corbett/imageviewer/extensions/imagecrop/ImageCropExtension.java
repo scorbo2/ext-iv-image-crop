@@ -8,7 +8,6 @@ import ca.corbett.extras.properties.KeyStrokeProperty;
 import ca.corbett.imageviewer.AppConfig;
 import ca.corbett.imageviewer.extensions.ImageViewerExtension;
 import ca.corbett.imageviewer.ui.MainWindow;
-import ca.corbett.imageviewer.ui.ReservedKeyStrokeWorkaround;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +45,8 @@ public class ImageCropExtension extends ImageViewerExtension {
                                         KeyStrokeManager.parseKeyStroke("Ctrl+Shift+C"),
                                         ImageCropAction.getInstance())
                       .setAllowBlank(true)
-                      .setHelpText("Show the image crop dialog")
-                      .addFormFieldGenerationListener(new ReservedKeyStrokeWorkaround()));
+                      .setReservedKeyStrokes(AppConfig.RESERVED_KEYSTROKES)
+                      .setHelpText("Show the image crop dialog"));
 
         return props;
     }
