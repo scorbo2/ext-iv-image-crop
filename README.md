@@ -42,8 +42,33 @@ cp target/ext-iv-image-crop-3.0.0.jar ~/.ImageViewer/extensions/
 ## Okay, it's installed, now how do I use it?
 
 Once ImageViewer has restarted, you can select "Crop image" from the "Edit" menu.
+That brings up the cropping dialog:
 
-TODO screenshots and usage tips
+![crop dialog](imagecrop1.jpg "Crop dialog")
+
+The dashed red border indicates the current crop area. Use the arrow keys as indicated in the "Instructions" section
+in the left panel to adjust the crop border. You can use the toggle buttons to control the increment by which the
+crop border moves as you use the arrow keys. If you want to start over, you can hit `ctrl+z` at any time to reset
+the crop back to the original image dimensions.
+
+Notice that as you move the crop borders, the "aspect ratio" labels in the left panel update to show the
+aspect ratio of the current crop, as compared to the aspect ratio of the original image. This can be useful
+if your goal is to crop the image to a specific aspect ratio, or if you wish the aspect ratio of the cropped
+image to match the original aspect ratio.
+
+You can use the "crop options" controls to adjust the color of the dashed crop line, and also to adjust
+its thickness, to make it more or less visually obvious in the overlay.
+
+Eventually, you will get the crop to where you want it:
+
+![crop dialog](imagecrop2.jpg "Crop dialog")
+
+When you are satisfied with the crop, hit the "Save and close" button, or just press "enter".
+You will be prompted to accept the current crop. The image is saved in place and the dialog closes automatically.
+
+## Notes
+
+Image cropping is currently only supported for jpeg and png images.
 
 ## Requirements
 
