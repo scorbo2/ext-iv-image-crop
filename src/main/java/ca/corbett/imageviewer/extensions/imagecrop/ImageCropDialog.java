@@ -355,6 +355,7 @@ public class ImageCropDialog extends JDialog {
         }
         catch (IOException | ArrayIndexOutOfBoundsException ioe) {
             getMessageUtil().error("Error loading image: " + ioe.getMessage(), ioe);
+            dispose();
         }
     }
 
