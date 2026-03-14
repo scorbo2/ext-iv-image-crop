@@ -477,11 +477,9 @@ public class ImageCropDialog extends JDialog {
     private void cleanup() {
         if (imagePanel != null) {
             imagePanel.dispose();
-            imagePanel = null;
         }
         if (keyStrokeManager != null) {
             keyStrokeManager.dispose();
-            keyStrokeManager = null;
         }
         if (originalImage != null) {
             originalImage.flush();
