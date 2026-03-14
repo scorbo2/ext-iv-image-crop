@@ -471,12 +471,20 @@ public class ImageCropDialog extends JDialog {
      * Idempotent cleanup method.
      */
     private void cleanup() {
-        if (originalImage != null) {
+        if (imagePanel != null) {
             imagePanel.dispose();
+            imagePanel = null;
+        }
+        if (keyStrokeManager != null) {
             keyStrokeManager.dispose();
+            keyStrokeManager = null;
+        }
+        if (originalImage != null) {
             originalImage.flush();
-            dBuffer.flush();
             originalImage = null;
+        }
+        if (dBuffer != null) {
+            dBuffer.flush();
             dBuffer = null;
         }
     }
