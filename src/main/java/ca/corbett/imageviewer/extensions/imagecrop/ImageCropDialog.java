@@ -350,7 +350,10 @@ public class ImageCropDialog extends JDialog {
             originalImage = ImageUtil.loadImage(srcFile);
             imgWidth = originalImage.getWidth();
             imgHeight = originalImage.getHeight();
-            dBuffer = new BufferedImage(imgWidth, imgHeight, BufferedImage.TYPE_INT_RGB);
+            int imageType = originalImage.getColorModel().hasAlpha()
+                    ? BufferedImage.TYPE_INT_ARGB
+                    : BufferedImage.TYPE_INT_RGB;
+            dBuffer = new BufferedImage(imgWidth, imgHeight, imageType);
             updateVisibleCrop();
         }
         catch (IOException | ArrayIndexOutOfBoundsException ioe) {
